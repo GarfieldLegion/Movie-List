@@ -16,30 +16,38 @@ import { useRouter } from "next/router";
 
 export default function Homepage() {
   const token = useStoreState((state) => state.token.token);
-  const setRememberVal = useStoreActions((actions) => actions.isRemember.setRememberStatus);
+  const setRememberVal = useStoreActions(
+    (actions) => actions.isRemember.setRememberStatus
+  );
   const rememberStatus = useStoreState((state) => state.isRemember.isRemember);
+  const savedEmail = useStoreState((state) => state.isRemember.Email);
+  const savedPassword = useStoreState((state) => state.isRemember.Pwd);
   const router = useRouter();
   const mailExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{1,}$/;
   const [email, setEmail] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [password, setPassword] = useState("");
   const [emailValid, setEmailValid] = useState(false);
-  const [remember, setRemember] = useState(false)
+  const [remember, setRemember] = useState(false);
   const handleEmail = (e) => {
+    setEmail(e.target.value);
     if (!mailExp.test(e.target.value) || e.target.value.length === 0) {
       setEmailValid(true);
     } else if (mailExp.test(e.target.value) && e.target.value.length > 0) {
-      setEmail(e.target.value);
       setEmailValid(false);
-      if(rememberStatus){
-        setRememberVal({"isRemember": true, "Email": e.target.value, "Pwd": password})
+      if (rememberStatus) {
+        setRememberVal({
+          isRemember: true,
+          Email: e.target.value,
+          Pwd: password,
+        });
       }
     }
   };
   const handlePwd = (e) => {
     setPassword(e.target.value);
-    if(rememberStatus){
-      setRememberVal({"isRemember": true, "Email": email, "Pwd": e.target.value})
+    if (rememberStatus) {
+      setRememberVal({ isRemember: true, Email: email, Pwd: e.target.value });
     }
   };
   const handleLogin = () => {
@@ -51,25 +59,29 @@ export default function Homepage() {
   };
 
   const handleRemember = (e) => {
-    let val = {}
-    if (e.target.checked){
-      setRemember(true)
+    let val = {};
+    if (e.target.checked) {
+      setRemember(true);
       val.isRemember = true;
       val.Email = email;
       val.Pwd = password;
-      setRememberVal(val)
-    }else{
-      setRemember(false)
+      setRememberVal(val);
+    } else {
+      setRemember(false);
       val.isRemember = false;
       val.Email = "";
       val.Pwd = "";
-      setRememberVal(val)
+      setRememberVal(val);
     }
-  }
+  };
 
-  useEffect(()=>{
-    setRemember(rememberStatus)
-  }, [rememberStatus])
+  useEffect(() => {
+    setRemember(rememberStatus);
+    if (rememberStatus) {
+      setEmail(savedEmail);
+      setPassword(savedPassword);
+    }
+  }, [rememberStatus]);
 
   return (
     <MainFrame>
@@ -80,6 +92,7 @@ export default function Homepage() {
             placeholder="Email"
             className="!text-white !bg-[var(--input-color)] !rounded-[10px] !h-[45px] mt-[48px] Body-Small font-regular !pl-[15px]"
             variant="unstyled"
+            value={email}
             onChange={(e) => {
               handleEmail(e);
             }}
@@ -102,7 +115,10 @@ export default function Homepage() {
               type={showPwd ? "text" : "password"}
               className="!text-white !bg-[var(--input-color)] !rounded-[10px] !h-[45px] Body-Small font-regular !pl-[15px] relative"
               variant="unstyled"
-              onChange={(e)=>{handlePwd(e)}}
+              value={password}
+              onChange={(e) => {
+                handlePwd(e);
+              }}
             />
             {showPwd && (
               <InputRightElement className="top-1/2 z-50">
@@ -128,7 +144,14 @@ export default function Homepage() {
             )}
           </InputGroup>
 
-          <Checkbox size="lg" className="mt-[24px] Body-Small font-regular" isChecked={remember} onChange={(e)=>{handleRemember(e)}}>
+          <Checkbox
+            size="lg"
+            className="mt-[24px] Body-Small font-regular"
+            isChecked={remember}
+            onChange={(e) => {
+              handleRemember(e);
+            }}
+          >
             Remember me
           </Checkbox>
           <div
